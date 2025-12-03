@@ -2,25 +2,29 @@ package cmd.app;
 
 import entity.Karyawan;
 import entity.Mobil;
+import entity.TransaksiSewa;
+import entity.TransaksiTravel;
 import java.util.Scanner;
 import service.karyawan_service;
 import service.mobil_service;
+import service.transaksi_service;
 
 public class mainTravel {
 
     private static final mobil_service mobilService = new mobil_service();
     private static final karyawan_service karyawanService = new karyawan_service();
+    private static final transaksi_service transaksiService = new transaksi_service();
     private static final Scanner input = new Scanner(System.in);
 
     public static void main(String[] args) {
         int pilihan;
-
         do {
             System.out.println("\n=== SISTEM FILKOM TOUR AND TRAVEL ===");
             System.out.println("1. Kelola Data Mobil");
             System.out.println("2. Kelola Data Karyawan");
-            System.out.println("3. Keluar");
-            System.out.print("Pilih menu (1-3): ");
+            System.out.println("3. Kelola Transaksi");
+            System.out.println("4. Keluar");
+            System.out.print("Pilih menu (1-4): ");
             pilihan = input.nextInt();
             input.nextLine();
 
@@ -32,12 +36,15 @@ public class mainTravel {
                     menuKaryawan();
                     break;
                 case 3:
+                    menuTransaksi();
+                    break;
+                case 4:
                     System.out.println("Keluar dari program...");
                     break;
                 default:
                     System.out.println("Pilihan tidak valid!");
             }
-        } while (pilihan != 3);
+        } while (pilihan != 4);
 
         input.close();
     }
@@ -232,9 +239,6 @@ public class mainTravel {
                 kategoriKaryawanBaru = "Tidak Diketahui";
                 break;
         }
-
-        Karyawan karyawanBaru = new Karyawan(namaBaru, alamatBaru, noTelpBaru, jenisKelaminBaru, kategoriKaryawanBaru);
-        karyawanService.replaceKaryawan(nama, karyawanBaru);
     }
 
     private static void hapusKaryawan() {
@@ -242,5 +246,150 @@ public class mainTravel {
         System.out.print("Masukkan nama karyawan yang ingin dihapus: ");
         String nama = input.nextLine();
         karyawanService.deleteKaryawan(nama);
+    }
+
+    private static void menuTransaksi() {
+        int pilihan;
+
+        do {
+            System.out.println("\n=== MENU TRANSAKSI ===");
+            System.out.println("1. Pemesanan Travel dengan Supir");
+            System.out.println("2. Pemesanan Sewa Mobil");
+            System.out.println("3. Lihat Semua Transaksi");
+            System.out.println("4. Update Status Transaksi");
+            System.out.println("5. Hapus Transaksi");
+            System.out.println("6. Kembali ke Menu Utama");
+            System.out.print("Pilih menu (1-6): ");
+            pilihan = input.nextInt();
+            input.nextLine();
+
+            switch (pilihan) {
+                case 1:
+                    tambahTransaksiTravel();
+                    break;
+                case 2:
+                    tambahTransaksiSewa();
+                    break;
+                case 3:
+                    transaksiService.tampilkanSemuaTransaksi();
+                    break;
+                case 4:
+                    updateStatusTransaksi();
+                    break;
+                case 5:
+                    hapusTransaksi();
+                    break;
+                case 6:
+                    System.out.println("Kembali ke menu utama...");
+                    break;
+                default:
+                    System.out.println("Pilihan tidak valid!");
+            }
+        } while (pilihan != 6);
+    }
+
+    private static void tambahTransaksiTravel() {
+        System.out.println("\n--- Pemesanan Travel dengan Supir ---");
+
+        System.out.print("ID Transaksi      : ");
+        String idTransaksi = input.nextLine();
+        System.out.print("Nama Pelanggan    : ");
+        String namaPelanggan = input.nextLine();
+        System.out.print("No. Telp          : ");
+        String noTelp = input.nextLine();
+        System.out.print("Tujuan            : ");
+        String tujuan = input.nextLine();
+        System.out.print("Nama Supir        : ");
+        String namaSupir = input.nextLine();
+        System.out.print("Merk Mobil        : ");
+        String merkMobil = input.nextLine();
+        System.out.print("No. Plat Mobil    : ");
+        String noPlat = input.nextLine();
+        System.out.print("Harga per Km      : ");
+        double hargaPerKm = input.nextDouble();
+        System.out.print("Jarak (km)        : ");
+        double jarakKm = input.nextDouble();
+        input.nextLine();
+
+        TransaksiTravel transaksi = new TransaksiTravel(
+                idTransaksi, namaPelanggan, noTelp, "Pending", tujuan,
+                namaSupir, merkMobil, noPlat, hargaPerKm, jarakKm
+        );
+        transaksiService.tambahTransaksi(transaksi);
+    }
+
+    private static void tambahTransaksiSewa() {
+        System.out.println("\n--- Pemesanan Sewa Mobil ---");
+
+        System.out.print("ID Transaksi      : ");
+        String idTransaksi = input.nextLine();
+        System.out.print("Nama Pelanggan    : ");
+        String namaPelanggan = input.nextLine();
+        System.out.print("No. Telp          : ");
+        String noTelp = input.nextLine();
+        System.out.print("Merk Mobil        : ");
+        String merkMobil = input.nextLine();
+        System.out.print("No. Plat Mobil    : ");
+        String noPlat = input.nextLine();
+        System.out.print("Lama Sewa (hari)  : ");
+        int lamaSewa = input.nextInt();
+        System.out.print("Harga per Hari    : ");
+        double hargaPerHari = input.nextDouble();
+        input.nextLine();
+
+        System.out.print("Dengan Supir? (y/n): ");
+        String pilihan = input.nextLine();
+        boolean denganSupir = pilihan.equalsIgnoreCase("y");
+
+        String namaSupir = "";
+        if (denganSupir) {
+            System.out.print("Nama Supir        : ");
+            namaSupir = input.nextLine();
+        }
+
+        TransaksiSewa transaksi = new TransaksiSewa(
+                idTransaksi, namaPelanggan, noTelp, "Pending", merkMobil,
+                noPlat, lamaSewa, hargaPerHari, denganSupir, namaSupir
+        );
+        transaksiService.tambahTransaksi(transaksi);
+    }
+
+    private static void updateStatusTransaksi() {
+        System.out.println("\n--- Update Status Transaksi ---");
+        System.out.print("Masukkan ID Transaksi: ");
+        String idTransaksi = input.nextLine();
+
+        System.out.println("\nPilih Status Baru:");
+        System.out.println("1. Pending");
+        System.out.println("2. Selesai");
+        System.out.println("3. Dibatalkan");
+        System.out.print("Pilih (1-3): ");
+        int pilihan = input.nextInt();
+        input.nextLine();
+
+        String status = "";
+        switch (pilihan) {
+            case 1:
+                status = "Pending";
+                break;
+            case 2:
+                status = "Selesai";
+                break;
+            case 3:
+                status = "Dibatalkan";
+                break;
+            default:
+                System.out.println("Pilihan tidak valid!");
+                return;
+        }
+
+        transaksiService.updateStatusTransaksi(idTransaksi, status);
+    }
+
+    private static void hapusTransaksi() {
+        System.out.println("\n--- Hapus Transaksi ---");
+        System.out.print("Masukkan ID Transaksi yang ingin dihapus: ");
+        String idTransaksi = input.nextLine();
+        transaksiService.hapusTransaksi(idTransaksi);
     }
 }
