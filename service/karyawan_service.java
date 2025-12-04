@@ -53,4 +53,49 @@ public class karyawan_service {
     public ArrayList<Karyawan> getDaftarKaryawan() {
         return daftarKaryawan;
     }
+
+    // Mendapat daftar supir travel yang tersedia
+    public ArrayList<Karyawan> getSupirTravelTersedia() {
+        ArrayList<Karyawan> supirTersedia = new ArrayList<>();
+        // for each
+        for (Karyawan karyawan : daftarKaryawan) {
+            if (karyawan.getKategoriKaryawan().equalsIgnoreCase("Supir Travel") && karyawan.isTersedia()) {
+                supirTersedia.add(karyawan);
+            }
+        }
+        return supirTersedia;
+    }
+
+    // mendapat daftar supir rentcar yang tersedia
+    public ArrayList<Karyawan> getSupirRentCarTersedia() {
+        ArrayList<Karyawan> supirTersedia = new ArrayList<>();
+        // for each
+        for (Karyawan karyawan : daftarKaryawan) {
+            if (karyawan.getKategoriKaryawan().equalsIgnoreCase("Supir Rentcar") && karyawan.isTersedia()) {
+                supirTersedia.add(karyawan);
+            }
+        }
+        return supirTersedia;
+    }
+
+    // Mencari karyawan berdasarkan nama
+    public Karyawan cariKaryawanByNama(String nama) {
+        // for each
+        for (Karyawan karyawan : daftarKaryawan) {
+            if (karyawan.getNama().equals(nama)) {
+                return karyawan;
+            }
+        }
+        return null;
+    }
+
+    // cek apakah ada supir travel tersedia
+    public boolean adaSupirTravelTersedia() {
+        return !getSupirTravelTersedia().isEmpty();
+    }
+
+    // cek apakah ada supir rentcar tersedia
+    public boolean adaSupirRentCarTersedia() {
+        return !getSupirRentCarTersedia().isEmpty();
+    }
 }

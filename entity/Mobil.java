@@ -6,6 +6,7 @@ public class Mobil {
     private final String merkMobil;
     private final String warnaMobil;
     private final int tahunKeluaran;
+    private boolean tersedia;
 
     public String getNoPlat() {
         return noPlat;
@@ -23,11 +24,20 @@ public class Mobil {
         return tahunKeluaran;
     }
 
+    public boolean isTersedia() {
+        return tersedia;
+    }
+
+    public void setTersedia(boolean tersedia) {
+        this.tersedia = tersedia;
+    }
+
     public Mobil(String noPlat, String merkMobil, String warnaMobil, int tahunKeluaran) {
         this.noPlat = noPlat;
         this.merkMobil = merkMobil;
         this.warnaMobil = warnaMobil;
         this.tahunKeluaran = tahunKeluaran;
+        this.tersedia = true;
     }
 
     public void nyalakanMesin() {

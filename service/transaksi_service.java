@@ -1,44 +1,44 @@
 package service;
 
-import entity.*;
+import entity.Transaksi;
 import java.util.ArrayList;
 
 public class transaksi_service {
 
     private ArrayList<Transaksi> daftarTransaksi = new ArrayList<>();
 
-    // Create
+    // CREATE
     public void tambahTransaksi(Transaksi transaksi) {
         daftarTransaksi.add(transaksi);
         System.out.println("✓ Transaksi berhasil ditambahkan!");
     }
 
-    // Read
+    // READ
     public void tampilkanSemuaTransaksi() {
         if (daftarTransaksi.isEmpty()) {
             System.out.println("Tidak ada data transaksi.");
             return;
         }
-        System.out.println("\n=== DATA TRANSAKSI FILKOM TOUR AND TRAVEL ===");
+        System.out.println("\n=== DAFTAR TRANSAKSI ===");
         for (int i = 0; i < daftarTransaksi.size(); i++) {
             System.out.println("\nTransaksi ke-" + (i + 1));
             daftarTransaksi.get(i).tampilkanDetail();
         }
     }
 
-    // Update status
+    // UPDATE STATUS
     public void updateStatusTransaksi(String idTransaksi, String statusBaru) {
-        for (Transaksi transaksi : daftarTransaksi) {
-            if (transaksi.getIdTransaksi().equals(idTransaksi)) {
-                transaksi.setStatusTransaksi(statusBaru);
-                System.out.println("✓ Status transaksi berhasil diperbarui!");
+        for (Transaksi t : daftarTransaksi) {
+            if (t.getIdTransaksi().equals(idTransaksi)) {
+                t.setStatusTransaksi(statusBaru);
+                System.out.println("✓ Status transaksi berhasil diupdate!");
                 return;
             }
         }
-        System.out.println("✗ Transaksi dengan ID " + idTransaksi + " tidak ditemukan!");
+        System.out.println("✗ Transaksi tidak ditemukan!");
     }
 
-    // Delete
+    // DELETE
     public void hapusTransaksi(String idTransaksi) {
         for (int i = 0; i < daftarTransaksi.size(); i++) {
             if (daftarTransaksi.get(i).getIdTransaksi().equals(idTransaksi)) {
@@ -47,16 +47,15 @@ public class transaksi_service {
                 return;
             }
         }
-        System.out.println("✗ Transaksi dengan ID " + idTransaksi + " tidak ditemukan!");
+        System.out.println("✗ Transaksi tidak ditemukan!");
     }
 
-    // (Opsional) cari berdasarkan ID
-    public Transaksi cariTransaksiById(String idTransaksi) {
-        for (Transaksi transaksi : daftarTransaksi) {
-            if (transaksi.getIdTransaksi().equals(idTransaksi)) {
-                return transaksi;
+    // Method tambahan - cari berdasarkan ID
+    public Transaksi cariTransaksi(String idTransaksi) {
+        for (Transaksi t : daftarTransaksi) {
+            if (t.getIdTransaksi().equals(idTransaksi)) {
+                return t;
             }
-
         }
         return null;
     }

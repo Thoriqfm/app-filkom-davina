@@ -7,6 +7,7 @@ public class Karyawan {
     private final String noTelp;
     private final String jenisKelamin;
     private final String kategoriKaryawan;
+    private boolean tersedia;
 
     public Karyawan(String nama, String alamat, String noTelp, String jenisKelamin, String kategoriKaryawan) {
         this.nama = nama;
@@ -14,6 +15,7 @@ public class Karyawan {
         this.noTelp = noTelp;
         this.jenisKelamin = jenisKelamin;
         this.kategoriKaryawan = kategoriKaryawan;
+        this.tersedia = true;
     }
 
     public void bekerja() {
@@ -49,4 +51,11 @@ public class Karyawan {
         return kategoriKaryawan;
     }
 
+    public boolean isTersedia() {
+        return tersedia;
+    }
+
+    public void setTersedia(boolean tersedia) {
+        this.tersedia = tersedia;
+    }
 }

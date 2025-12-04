@@ -55,4 +55,33 @@ public class mobil_service {
         return daftarMobil;
     }
 
+    // Tambahan method
+    // mendapat daftar mobil yang tersedia
+    public ArrayList<Mobil> getMobilTersedia() {
+        ArrayList<Mobil> mobilTersedia = new ArrayList<>();
+        // For each
+        for (Mobil mobil : daftarMobil) {
+            if (mobil.isTersedia()) {
+                mobilTersedia.add(mobil);
+            }
+        }
+        return mobilTersedia;
+    }
+
+    // Mencari mobil beradasrkan noPlat
+    public Mobil cariMobilByPlat(String noPlat) {
+        // for each
+        for (Mobil mobil : daftarMobil) {
+            if (mobil.getNoPlat().equals(noPlat)) {
+                return mobil;
+            }
+        }
+        return null;
+    }
+
+    // cek apakah ada mobil tersedia
+    public boolean adaMobilTersedia() {
+        return !getMobilTersedia().isEmpty();
+    }
+
 }

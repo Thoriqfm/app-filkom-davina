@@ -2,8 +2,10 @@ package cmd.app;
 
 import entity.Karyawan;
 import entity.Mobil;
+import entity.Transaksi;
 import entity.TransaksiSewa;
 import entity.TransaksiTravel;
+import java.util.ArrayList;
 import java.util.Scanner;
 import service.karyawan_service;
 import service.mobil_service;
@@ -239,6 +241,9 @@ public class mainTravel {
                 kategoriKaryawanBaru = "Tidak Diketahui";
                 break;
         }
+
+        Karyawan karyawanBaru = new Karyawan(namaBaru, alamatBaru, noTelpBaru, jenisKelaminBaru, kategoriKaryawanBaru);
+        karyawanService.replaceKaryawan(nama, karyawanBaru);
     }
 
     private static void hapusKaryawan() {
@@ -265,9 +270,41 @@ public class mainTravel {
 
             switch (pilihan) {
                 case 1:
+                    // Tamabahn validasi ketersediaan mobil dan supir
+                    if (mobilService.getDaftarMobil().isEmpty()) {
+                        System.out.println("\n✗ Tidak bisa melakukan transaksi!");
+                        System.out.println("  Belum ada data mobil. Silakan tambahkan mobil terlebih dahulu.");
+                        break;
+                    }
+                    if (karyawanService.getDaftarKaryawan().isEmpty()) {
+                        System.out.println("\n✗ Tidak bisa melakukan transaksi!");
+                        System.out.println("  Belum ada data karyawan. Silakan tambahkan supir terlebih dahulu.");
+                        break;
+                    }
+                    if (!mobilService.adaMobilTersedia()) {
+                        System.out.println("\n✗ Tidak ada mobil yang tersedia saat ini.");
+                        System.out.println("  Semua mobil sedang digunakan.");
+                        break;
+                    }
+                    if (!karyawanService.adaSupirTravelTersedia()) {
+                        System.out.println("\n✗ Tidak ada supir travel yang tersedia saat ini.");
+                        System.out.println("  Semua supir sedang bertugas atau belum ada supir travel.");
+                        break;
+                    }
                     tambahTransaksiTravel();
                     break;
                 case 2:
+                    // Tambah validasi ketersediaan mobil
+                    if (mobilService.getDaftarMobil().isEmpty()) {
+                        System.out.println("\n✗ Tidak bisa melakukan transaksi!");
+                        System.out.println("  Belum ada data mobil. Silakan tambahkan mobil terlebih dahulu.");
+                        break;
+                    }
+                    if (!mobilService.adaMobilTersedia()) {
+                        System.out.println("\n✗ Tidak ada mobil yang tersedia saat ini.");
+                        System.out.println("  Semua mobil sedang digunakan.");
+                        break;
+                    }
                     tambahTransaksiSewa();
                     break;
                 case 3:
@@ -299,23 +336,68 @@ public class mainTravel {
         String noTelp = input.nextLine();
         System.out.print("Tujuan            : ");
         String tujuan = input.nextLine();
-        System.out.print("Nama Supir        : ");
-        String namaSupir = input.nextLine();
-        System.out.print("Merk Mobil        : ");
-        String merkMobil = input.nextLine();
-        System.out.print("No. Plat Mobil    : ");
-        String noPlat = input.nextLine();
+
+        // menampilkan mobil yng tesedia
+        ArrayList<Mobil> mobilTersedia = mobilService.getMobilTersedia();
+        System.out.println("\nMobil Tersedia:");
+        for (int i = 0; i < mobilTersedia.size(); i++) {
+            System.out.println((i + 1) + ". " + mobilTersedia.get(i).getMerkMobil()
+                    + " (No. Plat: " + mobilTersedia.get(i).getNoPlat() + ")");
+        }
+
+        System.out.print("\n Pilih mobil (1-" + mobilTersedia.size() + "): ");
+        int pilihanMobil = input.nextInt();
+        input.nextLine();
+
+        // Seleksi pilihan
+        if (pilihanMobil < 1 || pilihanMobil > mobilTersedia.size()) {
+            System.out.println("Pilihan mobil tidak valid!");
+            return;
+        }
+
+        Mobil mobilDipilih = mobilTersedia.get(pilihanMobil - 1);
+
+        // menampilkan supir yang tersedia
+        ArrayList<Karyawan> supirTersedia = karyawanService.getSupirTravelTersedia();
+        System.out.println("\nSupir Travel Tersedia:");
+        for (int i = 0; i < supirTersedia.size(); i++) {
+            System.out.println((i + 1) + ". " + supirTersedia.get(i).getNama());
+        }
+
+        System.out.print("Pilih supir (1-" + supirTersedia.size() + "): ");
+        int pilihanSupir = input.nextInt();
+        input.nextLine();
+
+        // Seleksi pilihan
+        if (pilihanSupir < 1 || pilihanSupir > supirTersedia.size()) {
+            System.out.println("Pilihan supir tidak valid!");
+            return;
+        }
+
+        Karyawan supirDipilih = supirTersedia.get(pilihanSupir - 1);
+
         System.out.print("Harga per Km      : ");
         double hargaPerKm = input.nextDouble();
         System.out.print("Jarak (km)        : ");
         double jarakKm = input.nextDouble();
         input.nextLine();
 
+        // Set mobil dan supir menjadi tidak tersedia
+        mobilDipilih.setTersedia(false);
+        supirDipilih.setTersedia(false);
+
         TransaksiTravel transaksi = new TransaksiTravel(
                 idTransaksi, namaPelanggan, noTelp, "Pending", tujuan,
-                namaSupir, merkMobil, noPlat, hargaPerKm, jarakKm
+                supirDipilih.getNama(), mobilDipilih.getMerkMobil(),
+                mobilDipilih.getNoPlat(), hargaPerKm, jarakKm
         );
+
         transaksiService.tambahTransaksi(transaksi);
+
+        System.out.println("\n✓ Transaksi berhasil dibuat!");
+        System.out.println("  Mobil " + mobilDipilih.getMerkMobil() + " dan supir "
+                + supirDipilih.getNama() + " sekarang sedang digunakan.");
+
     }
 
     private static void tambahTransaksiSewa() {
@@ -327,10 +409,28 @@ public class mainTravel {
         String namaPelanggan = input.nextLine();
         System.out.print("No. Telp          : ");
         String noTelp = input.nextLine();
-        System.out.print("Merk Mobil        : ");
-        String merkMobil = input.nextLine();
-        System.out.print("No. Plat Mobil    : ");
-        String noPlat = input.nextLine();
+
+        // menampilka mobil yang tersedia
+        ArrayList<Mobil> mobilTersedia = mobilService.getMobilTersedia();
+        System.out.println("\n=== MOBIL YANG TERSEDIA ===");
+        for (int i = 0; i < mobilTersedia.size(); i++) {
+            System.out.println((i + 1) + ". " + mobilTersedia.get(i).getMerkMobil()
+                    + " (" + mobilTersedia.get(i).getNoPlat() + ")");
+        }
+
+        // input
+        System.out.print("\nPilih mobil (1-" + mobilTersedia.size() + "): ");
+        int pilihanMobil = input.nextInt();
+        input.nextLine();
+
+        // Seleksi pilihan
+        if (pilihanMobil < 1 || pilihanMobil > mobilTersedia.size()) {
+            System.out.println("✗ Pilihan tidak valid!");
+            return;
+        }
+
+        Mobil mobilDipilih = mobilTersedia.get(pilihanMobil - 1);
+
         System.out.print("Lama Sewa (hari)  : ");
         int lamaSewa = input.nextInt();
         System.out.print("Harga per Hari    : ");
@@ -342,22 +442,67 @@ public class mainTravel {
         boolean denganSupir = pilihan.equalsIgnoreCase("y");
 
         String namaSupir = "";
+        Karyawan supirDipilih = null;
+
+        // Seleksi jika dengan supir
         if (denganSupir) {
-            System.out.print("Nama Supir        : ");
-            namaSupir = input.nextLine();
+            // Cek apakah ada supir rentcar tersedia
+            if (!karyawanService.adaSupirRentCarTersedia()) {
+                System.out.println("\n✗ Tidak ada supir rentcar yang tersedia!");
+                System.out.println("  Transaksi dibatalkan.");
+                return;
+            }
+
+            // Tampilkan supir rentcar yang tersedia
+            ArrayList<Karyawan> supirTersedia = karyawanService.getSupirRentCarTersedia();
+            System.out.println("\n=== SUPIR RENTCAR YANG TERSEDIA ===");
+            for (int i = 0; i < supirTersedia.size(); i++) {
+                System.out.println((i + 1) + ". " + supirTersedia.get(i).getNama());
+            }
+
+            System.out.print("\nPilih supir (1-" + supirTersedia.size() + "): ");
+            int pilihanSupir = input.nextInt();
+            input.nextLine();
+
+            if (pilihanSupir < 1 || pilihanSupir > supirTersedia.size()) {
+                System.out.println("✗ Pilihan tidak valid!");
+                return;
+            }
+
+            supirDipilih = supirTersedia.get(pilihanSupir - 1);
+            namaSupir = supirDipilih.getNama();
+
+            // Set supir menjadi tidak tersedia
+            supirDipilih.setTersedia(false);
         }
 
+        // Set mobil menjadi tidak tersedia
+        mobilDipilih.setTersedia(false);
+
         TransaksiSewa transaksi = new TransaksiSewa(
-                idTransaksi, namaPelanggan, noTelp, "Pending", merkMobil,
-                noPlat, lamaSewa, hargaPerHari, denganSupir, namaSupir
+                idTransaksi, namaPelanggan, noTelp, "Pending", mobilDipilih.getMerkMobil(),
+                mobilDipilih.getNoPlat(), lamaSewa, hargaPerHari, denganSupir, namaSupir
         );
         transaksiService.tambahTransaksi(transaksi);
+
+        System.out.println("\n✓ Transaksi berhasil dibuat!");
+        System.out.println("  Mobil " + mobilDipilih.getMerkMobil() + " sekarang sedang digunakan.");
+        if (denganSupir) {
+            System.out.println("  Supir " + namaSupir + " sekarang sedang bertugas.");
+        }
     }
 
     private static void updateStatusTransaksi() {
         System.out.println("\n--- Update Status Transaksi ---");
         System.out.print("Masukkan ID Transaksi: ");
         String idTransaksi = input.nextLine();
+
+        // Cari transaksi
+        Transaksi transaksi = transaksiService.cariTransaksi(idTransaksi);
+        if (transaksi == null) {
+            System.out.println("✗ Transaksi tidak ditemukan!");
+            return;
+        }
 
         System.out.println("\nPilih Status Baru:");
         System.out.println("1. Pending");
@@ -381,6 +526,45 @@ public class mainTravel {
             default:
                 System.out.println("Pilihan tidak valid!");
                 return;
+        }
+
+        // Jika status berubah menjadi selesai atau dibatalkan, kembalikan mobil dan supir
+        if (status.equalsIgnoreCase("Selesai") || status.equalsIgnoreCase("Dibatalkan")) {
+            if (transaksi instanceof TransaksiTravel) {
+                TransaksiTravel transaksiTravel = (TransaksiTravel) transaksi;
+                // Kembalikan mobil
+                Mobil mobil = mobilService.cariMobilByPlat(transaksiTravel.getNoPlatMobil());
+                if (mobil != null) {
+                    mobil.setTersedia(true);
+                    System.out.println("Mobil " + mobil.getMerkMobil() + " kembali tersedia.");
+                }
+
+                // Kembalikan supir
+                Karyawan supir = karyawanService.cariKaryawanByNama(transaksiTravel.getNamaSupir());
+                if (supir != null) {
+                    supir.setTersedia(true);
+                    System.out.println("Supir " + supir.getNama() + " kembali tersedia.");
+                }
+
+            } else if (transaksi instanceof TransaksiSewa) {
+                TransaksiSewa transaksiSewa = (TransaksiSewa) transaksi;
+
+                // Kembalikan mobil
+                Mobil mobil = mobilService.cariMobilByPlat(transaksiSewa.getNoPlatMobil());
+                if (mobil != null) {
+                    mobil.setTersedia(true);
+                    System.out.println("Mobil " + mobil.getMerkMobil() + " kembali tersedia.");
+                }
+
+                // Kembalikan supir jika ada
+                if (transaksiSewa.isDenganSupir()) {
+                    Karyawan supir = karyawanService.cariKaryawanByNama(transaksiSewa.getNamaSupir());
+                    if (supir != null) {
+                        supir.setTersedia(true);
+                        System.out.println("  → Supir " + supir.getNama() + " kembali tersedia.");
+                    }
+                }
+            }
         }
 
         transaksiService.updateStatusTransaksi(idTransaksi, status);
